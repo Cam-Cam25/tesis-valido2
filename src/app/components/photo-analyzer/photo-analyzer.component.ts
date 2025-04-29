@@ -3,9 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { CameraService } from '../../services/camera.service';
 import { GeminiService } from '../../services/gemini.service';
-import { initializeApp } from 'firebase/app';
-import { getDatabase, ref, onValue } from 'firebase/database';
-import { environment } from '../../../environments/environment';
+import { FirebaseService } from '../../services/firebase.service';
 
 @Component({
   selector: 'app-photo-analyzer',
@@ -185,8 +183,7 @@ export class PhotoAnalyzerComponent implements OnDestroy {
   private cameraService = inject(CameraService);
   private geminiService = inject(GeminiService);
   private router = inject(Router);
-  private firebaseApp = initializeApp(environment.firebase);
-  private database = getDatabase(this.firebaseApp);
+  private firebaseService = inject(FirebaseService);
   private unsubscribe!: () => void;
 
   constructor() {
@@ -194,9 +191,7 @@ export class PhotoAnalyzerComponent implements OnDestroy {
   }
 
   private setupFirebaseListener() {
-    const sensorRef = ref(this.database, 'SensorUltrasonico/activado');
-    this.unsubscribe = onValue(sensorRef, (snapshot) => {
-      const isActivated = snapshot.val();
+    this.unsubscribe = this.firebaseService.listenToUltrasonicSensor((isActivated) => {
       if (isActivated && !this.isCapturing) {
         this.takePicture();
       }
@@ -288,6 +283,8 @@ export class PhotoAnalyzerComponent implements OnDestroy {
         if (isConfident) {
           // Determinar la clasificación final
           this.classification = this.classificationCount.orgánico > this.classificationCount.inorgánico ? 'orgánico' : 'inorgánico';
+          // Actualizar el resultado en Firebase
+          await this.firebaseService.updateClassificationResult(this.classification);
           if (!this.redirectTimer) {
             this.startRedirectTimer();
           }
