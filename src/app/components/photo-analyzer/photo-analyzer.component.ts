@@ -308,46 +308,41 @@ export class PhotoAnalyzerComponent implements OnDestroy {
   }
 
   private startRedirectTimer() {
-    // This check might be redundant now but good for safety
+    // Stop any previous timer just in case
     if (this.redirectTimer) {
-      return; 
+      clearInterval(this.redirectTimer);
     }
-    
-    // Stop the continuous capture/classification interval
-    if (this.captureInterval) {
-      clearInterval(this.captureInterval);
-      this.captureInterval = null;
-    }
-    this.isCapturing = false; // Update capturing status
 
-    this.redirectCountdown = 60; // Changed to 60 seconds as per previous code
-    console.log('Starting redirect timer...'); 
+    this.redirectCountdown = 5; // Keep the 5-second countdown
+    console.log('Starting redirect timer...');
     this.redirectTimer = setInterval(() => {
       if (this.redirectCountdown > 0) {
         this.redirectCountdown--;
       } else {
         clearInterval(this.redirectTimer);
         this.redirectTimer = null;
-        
-        // Stop the camera stream only when redirecting
-        this.cameraService.stopVideoStream(); 
-        
-        // *** ADD LOGGING HERE ***
-        console.log(`Redirecting to /result with classification: ${this.classification}`); 
-        
-        this.router.navigate(['/result'], {
-          state: { classification: this.classification }
-        }).then((success) => {
-          // *** ADD SUCCESS LOGGING ***
-          if (success) {
-            console.log('Navigation to /result successful');
-          } else {
-            console.log('Navigation to /result failed but no error thrown');
-          }
-        }).catch(error => {
-          console.error('Error during navigation to /result:', error);
-          this.error = 'Error al redirigir al videojuego';
-        });
+
+        // Camera should already be stopped here
+
+        // Modify the navigation call to remove the state object
+        console.log(`Redirecting to /result (no classification state passed)`);
+        this.router.navigate(['/result']) // Remove the state object here
+          .then((success) => {
+            if (success) {
+              console.log('Navigation to /result successful');
+              // Reset state after successful navigation
+              this.classification = undefined;
+              this.imageBase64 = undefined;
+              const previewDiv = document.querySelector('.preview');
+              if (previewDiv) previewDiv.innerHTML = ''; // Clear preview
+            } else {
+              console.log('Navigation to /result failed');
+              this.error = 'No se pudo redirigir a la pantalla de resultados.';
+            }
+          }).catch(error => {
+            console.error('Error during navigation to /result:', error);
+            this.error = 'Error al redirigir al videojuego';
+          });
       }
     }, 1000);
   }
@@ -360,8 +355,8 @@ export class PhotoAnalyzerComponent implements OnDestroy {
     }
     
     if (this.redirectTimer) {
-       clearInterval(this.redirectTimer);
-       this.redirectTimer = null;
+      clearInterval(this.redirectTimer);
+      this.redirectTimer = null;
     }
     
     this.cameraService.stopVideoStream();

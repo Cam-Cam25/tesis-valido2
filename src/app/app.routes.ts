@@ -4,5 +4,5 @@ import { ResultComponent } from './components/result/result.component';
 
 export const routes: Routes = [
   { path: '', component: PhotoAnalyzerComponent },
-  { path: 'result', component: ResultComponent }
+  { path: 'result', component: ResultComponent },
 ];

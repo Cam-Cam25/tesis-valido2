@@ -1,14 +1,21 @@
 import { Component } from '@angular/core';
-import { PhotoAnalyzerComponent } from './components/photo-analyzer/photo-analyzer.component';
+// Remove the import for PhotoAnalyzerComponent
+// import { PhotoAnalyzerComponent } from './components/photo-analyzer/photo-analyzer.component';
+import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [PhotoAnalyzerComponent],
+  // Only import RouterOutlet here
+  imports: [RouterOutlet],
   template: `
-    <main class="main-container">
-      <app-photo-analyzer></app-photo-analyzer>
-    </main>
+    <div class="main-container">
+      <!-- Remove the hardcoded component -->
+      <!-- <app-photo-analyzer></app-photo-analyzer> -->
+
+      <!-- Add the router-outlet for Angular Router to use -->
+      <router-outlet></router-outlet>
+    </div>
   `,
   styles: [`
     .main-container {
