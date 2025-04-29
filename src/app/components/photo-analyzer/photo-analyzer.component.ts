@@ -10,15 +10,11 @@ import { FirebaseService } from '../../services/firebase.service';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="container">
-      <h1>Clasificador de Residuos</h1>
-      
-      <div class="status-indicator" [class.active]="isInRange">
-        <span class="indicator-text">{{ proximityMessage }}</span>
-      </div>
-
+    <div class="container">      
+      <div class="camera-container">
       <div class="preview">
         <!-- El video se insertará aquí dinámicamente -->
+      </div>
       </div>
 
       <div *ngIf="classification" class="classification">
@@ -38,84 +34,48 @@ import { FirebaseService } from '../../services/firebase.service';
   `,
   styles: [`
     .container {
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 20px;
-      text-align: center;
-    }
+  background-image: url('/images/background.png');
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  overflow: hidden;
+  position: relative; /* Añadido para poder posicionar elementos absolutos dentro */
+}
 
-    h1 {
-      color: #2c3e50;
-      margin-bottom: 30px;
-    }
+.preview {
+  /* Aumentamos el tamaño para que sea más visible */
+  width: 560px;  /* Ajusta según tus necesidades */
+  height: 410px; /* Ajusta según tus necesidades */
+  max-width: 90%; /* Para asegurar responsividad */
+  
+  /* Centramos en la página */
+  position: absolute;
+  top: 52.5%;
+  left: 48.89%;
+  transform: translate(-50%, -50%);
+  
+  /* Estilo visual */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.1); /* Un fondo sutil */
+  overflow: hidden; /* Para que el video no sobresalga de los bordes redondeados */
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+}
 
-    .status-indicator {
-      padding: 15px;
-      background-color: #f8d7da;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      transition: all 0.3s ease;
-    }
+.preview video {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
 
-    .status-indicator.active {
-      background-color: #d4edda;
-    }
-
-    .indicator-text {
-      font-size: 16px;
-      color: #721c24;
-    }
-
-    .status-indicator.active .indicator-text {
-      color: #155724;
-    }
-
-    .actions {
-      margin: 20px 0;
-    }
-
-    .btn {
-      padding: 15px 30px;
-      border: none;
-      border-radius: 25px;
-      cursor: pointer;
-      font-size: 18px;
-      transition: all 0.3s ease;
-    }
-
-    .btn:disabled {
-      background-color: #cccccc;
-      cursor: not-allowed;
-    }
-
-    .primary {
-      background-color: #2ecc71;
-      color: white;
-    }
-
-    .primary:not(:disabled):hover {
-      background-color: #27ae60;
-    }
-
-    .preview {
-      margin: 20px auto;
-      max-width: 640px;
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background-color: #f8f9fa;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    }
-
-    .preview video {
-      width: 100%;
-      height: auto;
-      display: block;
-      object-fit: cover;
-    }
 
     .preview img {
       width: 100%;

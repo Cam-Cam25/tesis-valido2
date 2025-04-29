@@ -20,8 +20,17 @@ import { RouterOutlet } from '@angular/router';
   styles: [`
     .main-container {
       min-height: 100vh;
-      background-color: #f0f2f5;
-      padding: 20px;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
     }
   `]
 })
