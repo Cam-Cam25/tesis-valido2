@@ -10,6 +10,23 @@ export class CameraService {
   private stream: MediaStream | null = null;
   private videoElement: HTMLVideoElement | null = null;
 
+    // Método para solicitar permisos explícitamente
+    async requestCameraPermission(): Promise<boolean> {
+      try {
+        // Intentamos obtener un stream temporal solo para solicitar permisos
+        const tempStream = await navigator.mediaDevices.getUserMedia({ video: true });
+        
+        // Si llegamos aquí, los permisos fueron concedidos
+        // Liberamos el stream temporal inmediatamente
+        tempStream.getTracks().forEach(track => track.stop());
+        
+        return true;
+      } catch (error) {
+        console.error('Error al solicitar permisos de cámara:', error);
+        return false;
+      }
+    }
+
   stopVideoStream() {
     if (this.stream) {
       this.stream.getTracks().forEach(track => track.stop());

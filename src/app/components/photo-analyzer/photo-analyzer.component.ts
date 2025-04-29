@@ -1,9 +1,12 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { CameraService } from '../../services/camera.service';
 import { GeminiService } from '../../services/gemini.service';
 import { ProximityService } from '../../../app/services/proximity.service';
+import { initializeApp } from 'firebase/app';
+import { getDatabase, ref, onValue } from 'firebase/database';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-photo-analyzer',
@@ -15,15 +18,6 @@ import { ProximityService } from '../../../app/services/proximity.service';
       
       <div class="status-indicator" [class.active]="isInRange">
         <span class="indicator-text">{{ proximityMessage }}</span>
-      </div>
-
-      <div class="actions">
-        <button 
-          (click)="takePicture()" 
-          class="btn primary" 
-          [disabled]="!isInRange || analyzing">
-          {{ isCapturing ? 'Detener Cámara' : 'Iniciar Cámara' }}
-        </button>
       </div>
 
       <div class="preview">
@@ -174,7 +168,7 @@ import { ProximityService } from '../../../app/services/proximity.service';
     }
   `]
 })
-export class PhotoAnalyzerComponent {
+export class PhotoAnalyzerComponent implements OnDestroy {
   imageBase64: string | undefined;
   classification: string | undefined;
   analyzing = false;
@@ -191,9 +185,23 @@ export class PhotoAnalyzerComponent {
   private geminiService = inject(GeminiService);
   private proximityService = inject(ProximityService);
   private router = inject(Router);
+  private firebaseApp = initializeApp(environment.firebase);
+  private database = getDatabase(this.firebaseApp);
+  private unsubscribe!: () => void;
 
   constructor() {
     this.startProximityDetection();
+    this.setupFirebaseListener();
+  }
+
+  private setupFirebaseListener() {
+    const sensorRef = ref(this.database, 'SensorUltrasonico/activado');
+    this.unsubscribe = onValue(sensorRef, (snapshot) => {
+      const isActivated = snapshot.val();
+      if (isActivated && !this.isCapturing && this.isInRange) {
+        this.takePicture();
+      }
+    });
   }
 
   private startProximityDetection() {
@@ -251,6 +259,12 @@ export class PhotoAnalyzerComponent {
       console.error('Error al iniciar la captura:', error);
       this.stopCapture();
       this.error = error.message || 'Error al acceder a la cámara. Por favor, verifica los permisos.';
+    }
+  }
+
+  ngOnDestroy() {
+    if (this.unsubscribe) {
+      this.unsubscribe();
     }
   }
 

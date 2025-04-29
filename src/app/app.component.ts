@@ -1,11 +1,10 @@
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
 import { PhotoAnalyzerComponent } from './components/photo-analyzer/photo-analyzer.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, PhotoAnalyzerComponent],
+  imports: [PhotoAnalyzerComponent],
   template: `
     <main class="main-container">
       <app-photo-analyzer></app-photo-analyzer>
