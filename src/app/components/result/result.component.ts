@@ -7,16 +7,7 @@ import { RouterModule, Router } from '@angular/router';
   standalone: true,
   imports: [CommonModule, RouterModule],
   template: `
-    <div class="container">
-      <div class="header">
-        <!-- You can keep or remove the classification badge -->
-        <div class="classification-badge" *ngIf="classification">
-          Residuo clasificado como: <span [class]="classification.toLowerCase()">{{ classification }}</span>
-        </div>
-        <div *ngIf="!classification && !isLoading" class="error-message">
-          No se recibió la clasificación. Volviendo al inicio...
-        </div>
-      </div>
+
 
       <div class="game-container">
         <!-- Replace placeholder with your game title -->
@@ -29,7 +20,6 @@ import { RouterModule, Router } from '@angular/router';
       <div class="controls">
         <button class="btn primary" routerLink="/">Volver a Clasificar</button>
       </div>
-    </div>
   `,
   styles: [`
     .container {

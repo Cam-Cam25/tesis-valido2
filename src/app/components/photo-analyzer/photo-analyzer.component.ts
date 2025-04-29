@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { CameraService } from '../../services/camera.service';
 import { GeminiService } from '../../services/gemini.service';
-import { ProximityService } from '../../../app/services/proximity.service';
 import { initializeApp } from 'firebase/app';
 import { getDatabase, ref, onValue } from 'firebase/database';
 import { environment } from '../../../environments/environment';
@@ -172,25 +171,25 @@ export class PhotoAnalyzerComponent implements OnDestroy {
   imageBase64: string | undefined;
   classification: string | undefined;
   analyzing = false;
-  isInRange = false;
-  proximityMessage = 'Acerque el residuo a 36 cm de la cámara';
+  isInRange = true; // Siempre true para permitir la detección continua
+  proximityMessage = 'Detectando residuo...'; // Mensaje actualizado
   error: string | undefined;
   isCapturing = false;
   captureInterval: any;
-  captureTimeLeft = 35; // Cambiado de 300 a 35 segundos
+  captureTimeLeft = 35;
   redirectCountdown = 0;
   redirectTimer: any;
+  classificationCount = { orgánico: 0, inorgánico: 0 }; // Contador para clasificaciones
+  requiredConfidence = 5; // Número de detecciones consistentes requeridas
 
   private cameraService = inject(CameraService);
   private geminiService = inject(GeminiService);
-  private proximityService = inject(ProximityService);
   private router = inject(Router);
   private firebaseApp = initializeApp(environment.firebase);
   private database = getDatabase(this.firebaseApp);
   private unsubscribe!: () => void;
 
   constructor() {
-    this.startProximityDetection();
     this.setupFirebaseListener();
   }
 
@@ -198,21 +197,13 @@ export class PhotoAnalyzerComponent implements OnDestroy {
     const sensorRef = ref(this.database, 'SensorUltrasonico/activado');
     this.unsubscribe = onValue(sensorRef, (snapshot) => {
       const isActivated = snapshot.val();
-      if (isActivated && !this.isCapturing && this.isInRange) {
+      if (isActivated && !this.isCapturing) {
         this.takePicture();
       }
     });
   }
 
-  private startProximityDetection() {
-    this.proximityService.startDetection().subscribe((distance: number) => {
-      // Validar si la distancia está en el rango de 36 cm con un margen de ±2 cm
-      this.isInRange = distance >= 34 && distance <= 38;
-      this.proximityMessage = this.isInRange
-        ? 'Distancia correcta - Listo para capturar'
-        : 'Acerque el residuo a 36 cm de la cámara';
-    });
-  }
+
 
   async takePicture() {
     if (this.isCapturing) {
@@ -269,15 +260,13 @@ export class PhotoAnalyzerComponent implements OnDestroy {
   }
 
   private async classifyWaste() {
-    if (!this.imageBase64 || !this.isInRange) {
-      // Don't show error if we are already counting down, just skip analysis
+    if (!this.imageBase64) {
       if (!this.redirectTimer) {
-        this.error = !this.isInRange ? 'Ajuste la distancia del residuo a 36 cm' : 'No hay imagen para analizar';
+        this.error = 'No hay imagen para analizar';
       }
       return;
     }
   
-    // Avoid starting new analysis if redirect timer is already running
     if (this.analyzing || this.redirectTimer) {
       return;
     }
@@ -289,23 +278,26 @@ export class PhotoAnalyzerComponent implements OnDestroy {
       const currentClassification = await this.geminiService.analyzeImage(this.imageBase64);
       
       if (currentClassification && ['orgánico', 'inorgánico'].includes(currentClassification.toLowerCase())) {
-        this.classification = currentClassification; // Update classification display
+        // Incrementar el contador para la clasificación actual
+        this.classificationCount[currentClassification.toLowerCase() as keyof typeof this.classificationCount]++;
         
-        // Start the redirect timer only if it hasn't been started yet
-        if (!this.redirectTimer) {
-          this.startRedirectTimer();
+        // Verificar si alguna clasificación alcanzó el umbral de confianza
+        const maxCount = Math.max(this.classificationCount.orgánico, this.classificationCount.inorgánico);
+        const isConfident = maxCount >= this.requiredConfidence;
+        
+        if (isConfident) {
+          // Determinar la clasificación final
+          this.classification = this.classificationCount.orgánico > this.classificationCount.inorgánico ? 'orgánico' : 'inorgánico';
+          if (!this.redirectTimer) {
+            this.startRedirectTimer();
+          }
+        } else {
+          // Actualizar la clasificación temporal pero continuar detectando
+          this.classification = currentClassification;
         }
-      } else {
-         // If classification is not valid and timer hasn't started, maybe show an error or clear previous invalid classification
-         if (!this.redirectTimer) {
-            this.classification = undefined; 
-            // Optionally: throw new Error('Clasificación no válida'); 
-         }
       }
-      
     } catch (error: any) {
       console.error('Error al clasificar el residuo:', error);
-       // Only show error if timer hasn't started
       if (!this.redirectTimer) {
         this.error = error.message || 'Error al clasificar el residuo';
         this.classification = undefined;
@@ -367,18 +359,17 @@ export class PhotoAnalyzerComponent implements OnDestroy {
       this.captureInterval = null;
     }
     
-    // Stop the redirect timer if the user manually stops capture
     if (this.redirectTimer) {
        clearInterval(this.redirectTimer);
        this.redirectTimer = null;
     }
     
     this.cameraService.stopVideoStream();
-    // Reset state when manually stopped
     this.classification = undefined; 
     this.imageBase64 = undefined;
     this.error = undefined;
     this.redirectCountdown = 0;
-    this.analyzing = false; // Ensure analyzing flag is reset
+    this.analyzing = false;
+    this.classificationCount = { orgánico: 0, inorgánico: 0 }; // Reiniciar contadores
   }
 }
