@@ -23,18 +23,25 @@ import { FirebaseService } from '../../services/firebase.service';
           {{ classification }}
         </div>
         <div class="timer" *ngIf="redirectCountdown > 0">
-          <p>Redirigiendo al videojuego en {{ redirectCountdown }} segundos</p>
+          <p>Redirigiendo al <br> RRAWR GAME en <br> {{ redirectCountdown }} segundos</p>
         </div>
       </div>
 
       <div *ngIf="error" class="error">
         <p>{{ error }}</p>
       </div>
+
+      <div *ngIf="classification === 'orgánico'" class="glass-card">
+        <img src="/images/TARJETAORGANICO.svg" alt="Contenedor de vidrio" />
+      </div>
+      <div *ngIf="classification === 'inorgánico'" class="glass-card">
+        <img src="/images/TARJETAINORGANICO.svg" alt="Contenedor de vidrio" />
+      </div>
     </div>
   `,
   styles: [`
     .container {
-  background-image: url('/images/background.png');
+  background-image: url('/images/FONDO.svg');
   width: 100%;
   height: 100vh;
   display: flex;
@@ -50,13 +57,13 @@ import { FirebaseService } from '../../services/firebase.service';
 
 .preview {
   /* Aumentamos el tamaño para que sea más visible */
-  width: 560px;  /* Ajusta según tus necesidades */
-  height: 410px; /* Ajusta según tus necesidades */
+  width: 581px;  /* Ajusta según tus necesidades */
+  height: 423px; /* Ajusta según tus necesidades */
   max-width: 90%; /* Para asegurar responsividad */
   
   /* Centramos en la página */
   position: absolute;
-  top: 52.5%;
+  top: 52%;
   left: 48.89%;
   transform: translate(-50%, -50%);
   
@@ -105,24 +112,58 @@ import { FirebaseService } from '../../services/firebase.service';
       background-color: #90caf9;
       color: #0d47a1;
     }
-
-    .timer {
-      margin-top: 20px;
-      font-size: 16px;
-      color: #666;
-      animation: pulse 1s infinite;
-    }
-
-    @keyframes pulse {
-      0% { opacity: 1; }
-      50% { opacity: 0.7; }
-      100% { opacity: 1; }
-    }
+  
+  .timer {
+    font-family: 'Pixelify Sans', sans-serif;
+    background-image: url('/images/TARJETAVACIA.svg');
+    color: white;
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 8px;
+    box-sizing: border-box;
+    right:120px;
+    top: 50%;
+    width: 200px;
+    height: 200px;
+}
 
     .error {
       color: #dc3545;
       margin-top: 20px;
     }
+
+    .glass-card {
+            position: fixed;
+            left: 80px;
+            top: 60%;
+            transform: translateY(-50%);
+            padding: 15px;
+            border-radius: 12px;
+            transition: all 0.3s ease-in-out;
+            z-index: 1000;
+            width: 10%;
+        }
+        
+        .glass-card:hover {
+            transform: translateY(-52%);
+        }
+        
+        .glass-card h3 {
+            margin-top: 0;
+            color: #333;
+            font-size: 18px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .glass-card p {
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
   `]
 })
 export class PhotoAnalyzerComponent implements OnDestroy {
@@ -270,7 +311,7 @@ export class PhotoAnalyzerComponent implements OnDestroy {
       clearInterval(this.redirectTimer);
     }
 
-    this.redirectCountdown = 5; // Keep the 5-second countdown
+    this.redirectCountdown = 10800; // Keep the 5-second countdown
     console.log('Starting redirect timer...');
     this.redirectTimer = setInterval(() => {
       if (this.redirectCountdown > 0) {
