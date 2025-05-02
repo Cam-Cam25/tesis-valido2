@@ -8,17 +8,28 @@ import { FirebaseService } from '../../services/firebase.service';
   standalone: true,
   imports: [CommonModule, RouterModule],
   template: `
-    <div class="container">
-      <h1>*** RESULT COMPONENT LOADED (Simplified) ***</h1>
-      <p>Waiting for videogame integration...</p>
-      <button class="btn primary" routerLink="/">Volver a Clasificar</button>
+   <div class="game-container">
+      <iframe #godotFrame
+              src="/godot-game/RRAWR.html" 
+              width="340"
+              height="190"
+              frameborder="0"
+              allow="autoplay"
+              style="background: #000;"></iframe>
     </div>
   `,
   styles: [`
-    .container { padding: 20px; text-align: center; }
-    h1 { color: green; }
-    .btn { padding: 10px 20px; margin-top: 20px; }
-    .primary { background-color: #2ecc71; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    .game-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+iframe {
+  border: none;
+  background: #000;
+}
   `]
 })
 export class ResultComponent implements OnInit, OnDestroy {
