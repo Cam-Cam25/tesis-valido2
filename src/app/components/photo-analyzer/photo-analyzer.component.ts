@@ -28,10 +28,10 @@ import { FirebaseService } from '../../services/firebase.service';
       </div>
 
       <div *ngIf="classification === 'orgánico'" class="glass-card">
-        <img src="/images/TARJETAORGANICO.svg" alt="Contenedor de vidrio" />
+        <img src="/images/TARJETAORGANICA.svg" alt="Contenedor de vidrio" />
       </div>
       <div *ngIf="classification === 'inorgánico'" class="glass-card">
-        <img src="/images/TARJETAINORGANICO.svg" alt="Contenedor de vidrio" />
+        <img src="/images/TARJETAINORGANICA.svg" alt="Contenedor de vidrio" />
       </div>
     </div>
   `,
