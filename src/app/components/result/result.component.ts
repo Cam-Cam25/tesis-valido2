@@ -1,6 +1,7 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
+import { FirebaseService } from '../../services/firebase.service';
 
 @Component({
   selector: 'app-result',
@@ -20,21 +21,30 @@ import { RouterModule, Router } from '@angular/router';
     .primary { background-color: #2ecc71; color: white; border: none; border-radius: 5px; cursor: pointer; }
   `]
 })
-export class ResultComponent implements OnInit {
+export class ResultComponent implements OnInit, OnDestroy {
   private router = inject(Router);
+  private firebaseService = inject(FirebaseService);
+  private unsubscribe!: () => void;
 
   constructor() {
-    // Temporarily remove complex logic
-    console.log('*** ResultComponent constructor (Simplified) ***');
-    // const state = history.state;
-    // const navigation = this.router.getCurrentNavigation();
-    // ... remove state/sessionStorage logic for now ...
+    this.setupFirebaseListener();
+  }
+
+  private setupFirebaseListener() {
+    this.unsubscribe = this.firebaseService.listenToGameEvents((event) => {
+      if (event === 'game_over') {
+        this.router.navigate(['/']);
+      }
+    });
   }
 
   ngOnInit() {
-    // Temporarily remove complex logic
-    console.log('*** ResultComponent ngOnInit (Simplified) ***');
-    // this.isLoading = false;
-    // ... remove classification check and redirect logic for now ...
+    console.log('ResultComponent initialized');
+  }
+
+  ngOnDestroy() {
+    if (this.unsubscribe) {
+      this.unsubscribe();
+    }
   }
 }

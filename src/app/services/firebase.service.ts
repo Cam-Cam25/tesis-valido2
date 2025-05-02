@@ -32,4 +32,25 @@ export class FirebaseService {
     });
     return unsubscribe;
   }
+
+  // Método para enviar el evento de inicio del juego
+  async sendGameStartEvent(): Promise<void> {
+    try {
+      const eventRef = ref(this.database, 'game_events/event/event');
+      await set(eventRef, 'start');
+    } catch (error) {
+      console.error('Error al enviar evento de inicio:', error);
+      throw error;
+    }
+  }
+
+  // Método para escuchar eventos del juego
+  listenToGameEvents(callback: (event: string) => void): () => void {
+    const eventRef = ref(this.database, 'game_events/event/event');
+    const unsubscribe = onValue(eventRef, (snapshot) => {
+      const event = snapshot.val();
+      callback(event);
+    });
+    return unsubscribe;
+  }
 }

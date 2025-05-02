@@ -18,12 +18,8 @@ import { FirebaseService } from '../../services/firebase.service';
       </div>
 
       <div *ngIf="classification" class="classification">
-        <h2>Clasificación del Residuo</h2>
-        <div class="result" [class]="classification.toLowerCase()">
-          {{ classification }}
-        </div>
         <div class="timer" *ngIf="redirectCountdown > 0">
-          <p>Redirigiendo al <br> RRAWR GAME en <br> {{ redirectCountdown }} segundos</p>
+          <p>RRAWR GAME en <br> {{ redirectCountdown }} segundos</p>
         </div>
       </div>
 
@@ -57,14 +53,14 @@ import { FirebaseService } from '../../services/firebase.service';
 
 .preview {
   /* Aumentamos el tamaño para que sea más visible */
-  width: 581px;  /* Ajusta según tus necesidades */
-  height: 423px; /* Ajusta según tus necesidades */
+  width: 583px;  /* Ajusta según tus necesidades */
+  height: 426px; /* Ajusta según tus necesidades */
   max-width: 90%; /* Para asegurar responsividad */
   
   /* Centramos en la página */
   position: absolute;
-  top: 52%;
-  left: 48.89%;
+  top: 52.1%;
+  left: 49%;
   transform: translate(-50%, -50%);
   
   /* Estilo visual */
@@ -115,6 +111,7 @@ import { FirebaseService } from '../../services/firebase.service';
   
   .timer {
     font-family: 'Pixelify Sans', sans-serif;
+    font-size: 25px;
     background-image: url('/images/TARJETAVACIA.svg');
     color: white;
     position: absolute;
@@ -125,7 +122,7 @@ import { FirebaseService } from '../../services/firebase.service';
     padding: 8px;
     box-sizing: border-box;
     right:120px;
-    top: 50%;
+    top: 40%;
     width: 200px;
     height: 200px;
 }
@@ -138,7 +135,7 @@ import { FirebaseService } from '../../services/firebase.service';
     .glass-card {
             position: fixed;
             left: 80px;
-            top: 60%;
+            top: 50%;
             transform: translateY(-50%);
             padding: 15px;
             border-radius: 12px;
@@ -189,6 +186,8 @@ export class PhotoAnalyzerComponent implements OnDestroy {
 
   constructor() {
     this.setupFirebaseListener();
+    // Enviar evento 'start' cuando se inicia el componente
+    this.firebaseService.sendGameStartEvent();
   }
 
   private setupFirebaseListener() {
@@ -311,7 +310,7 @@ export class PhotoAnalyzerComponent implements OnDestroy {
       clearInterval(this.redirectTimer);
     }
 
-    this.redirectCountdown = 10800; // Keep the 5-second countdown
+    this.redirectCountdown = 5; // Keep the 5-second countdown
     console.log('Starting redirect timer...');
     this.redirectTimer = setInterval(() => {
       if (this.redirectCountdown > 0) {

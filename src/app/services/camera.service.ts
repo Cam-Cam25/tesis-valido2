@@ -10,22 +10,31 @@ export class CameraService {
   private stream: MediaStream | null = null;
   private videoElement: HTMLVideoElement | null = null;
 
-    // Método para solicitar permisos explícitamente
-    async requestCameraPermission(): Promise<boolean> {
-      try {
-        // Intentamos obtener un stream temporal solo para solicitar permisos
-        const tempStream = await navigator.mediaDevices.getUserMedia({ video: true });
-        
-        // Si llegamos aquí, los permisos fueron concedidos
-        // Liberamos el stream temporal inmediatamente
-        tempStream.getTracks().forEach(track => track.stop());
-        
-        return true;
-      } catch (error) {
-        console.error('Error al solicitar permisos de cámara:', error);
-        return false;
+    // Método para conectar directamente a la cámara externa
+  async connectToExternalCamera(): Promise<MediaStream | null> {
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const externalCameras = devices.filter(device => 
+        device.kind === 'videoinput' && 
+        device.label !== 'Default' && 
+        device.label !== 'Built-in Camera'
+      );
+
+      if (externalCameras.length > 0) {
+        return await navigator.mediaDevices.getUserMedia({
+          video: {
+            deviceId: { exact: externalCameras[0].deviceId },
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          }
+        });
       }
+      return null;
+    } catch (error) {
+      console.error('Error al conectar con la cámara externa:', error);
+      return null;
     }
+  }
 
   stopVideoStream() {
     if (this.stream) {
@@ -40,23 +49,26 @@ export class CameraService {
 
   async startVideoStream(): Promise<HTMLVideoElement> {
     try {
-      // Verificar si hay cámaras disponibles
-      const devices = await navigator.mediaDevices.enumerateDevices();
-      const cameras = devices.filter(device => device.kind === 'videoinput');
-      
-      if (cameras.length === 0) {
-        throw new Error('No se detectó ninguna cámara web en el dispositivo. Por favor, verifica que tu dispositivo tenga una cámara web y que esté funcionando correctamente.');
-      }
-
-      // Solicitar acceso a la cámara directamente
       if (!this.stream) {
-        this.stream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            width: { ideal: 1280 },
-            height: { ideal: 720 },
-            facingMode: 'environment'
+        // Intentar conectar con la cámara externa primero
+        this.stream = await this.connectToExternalCamera();
+        
+        // Si no hay cámara externa, usar cualquier cámara disponible
+        if (!this.stream) {
+          const devices = await navigator.mediaDevices.enumerateDevices();
+          const cameras = devices.filter(device => device.kind === 'videoinput');
+          
+          if (cameras.length === 0) {
+            throw new Error('No se detectó ninguna cámara en el dispositivo.');
           }
-        });
+          
+          this.stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+              width: { ideal: 1280 },
+              height: { ideal: 720 }
+            }
+          });
+        }
       }
 
       // Crear o reutilizar el elemento de video
