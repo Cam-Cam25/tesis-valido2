@@ -1,6 +1,6 @@
 export const environment = {
-  production: true,
-  geminiApiKey: 'AIzaSyDrSlJAScaVRb8RCcWG9fR-ajBzxGYJxCQ', // Reemplazar con tu clave de API de Gemini  // Add your Firebase configuration object here
+  production: false,
+  geminiApiKey: 'AIzaSyBERoOWeJTfhcLF5_9AZUpZrNLiddGdPeo', // Reemplazar con tu clave de API de Gemini
   firebase: {
     apiKey: "AIzaSyA0zo0ADtApSvpWjjQFayVc0xwp37vDK7E",
     authDomain: "tesis-esp32-3e3ab.firebaseapp.com",

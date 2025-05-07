@@ -37,20 +37,49 @@ export class FirebaseService {
   async sendGameStartEvent(): Promise<void> {
     try {
       const eventRef = ref(this.database, 'game_events/event/event');
-      await set(eventRef, 'start');
+      const classificationRef = ref(this.database, 'clasificacion/resultado');
+      
+      // Actualizar tanto el evento como limpiar la clasificación
+      await Promise.all([
+        set(eventRef, 'start'),
+        set(classificationRef, '')
+      ]);
     } catch (error) {
       console.error('Error al enviar evento de inicio:', error);
       throw error;
     }
   }
 
-  // Método para escuchar eventos del juego
+  // Método para escuchar eventos del juego con manejo mejorado
   listenToGameEvents(callback: (event: string) => void): () => void {
     const eventRef = ref(this.database, 'game_events/event/event');
+    let lastEvent: string | null = null;
+    
     const unsubscribe = onValue(eventRef, (snapshot) => {
-      const event = snapshot.val();
-      callback(event);
+      try {
+        const event = snapshot.val();
+        console.log('Evento recibido del juego:', event, 'Último evento:', lastEvent);
+        
+        // Validar que el evento sea diferente al último para evitar duplicados
+        if (event && event !== lastEvent) {
+          lastEvent = event;
+          console.log('Procesando nuevo evento del juego:', event);
+          callback(event);
+        }
+      } catch (error) {
+        console.error('Error al procesar evento del juego:', error);
+        // Intentar limpiar el estado en caso de error
+        this.sendGameStartEvent().catch(err => 
+          console.error('Error al limpiar estado después de error:', err)
+        );
+      }
+    }, (error) => {
+      console.error('Error en la suscripción a eventos del juego:', error);
     });
-    return unsubscribe;
+
+    return () => {
+      console.log('Limpiando suscripción a eventos del juego');
+      unsubscribe();
+    };
   }
 }

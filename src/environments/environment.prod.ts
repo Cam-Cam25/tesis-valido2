@@ -1,7 +1,8 @@
 export const environment = {
   production: true,
-  geminiApiKey: 'AIzaSyDrSlJAScaVRb8RCcWG9fR-ajBzxGYJxCQ', // Reemplazar con tu clave de API de Gemini  
+  geminiApiKey: 'AIzaSyBERoOWeJTfhcLF5_9AZUpZrNLiddGdPeo', // Reemplazar con tu clave de API de Gemini  
   firebase: {
+    databaseURL: "https://tesis-esp32-3e3ab-default-rtdb.firebaseio.com", // Your Database URL
     apiKey: "AIzaSyA0zo0ADtApSvpWjjQFayVc0xwp37vDK7E",
   authDomain: "tesis-esp32-3e3ab.firebaseapp.com",
   projectId: "tesis-esp32-3e3ab",

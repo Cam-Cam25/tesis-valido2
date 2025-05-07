@@ -190,9 +190,17 @@ export class PhotoAnalyzerComponent implements OnDestroy {
     this.firebaseService.sendGameStartEvent();
   }
 
+  private lastActivationTime = 0;
+  private readonly DEBOUNCE_TIME = 3000; // 3 segundos de debounce
+  private isProcessing = false;
+
   private setupFirebaseListener() {
     this.unsubscribe = this.firebaseService.listenToUltrasonicSensor((isActivated) => {
-      if (isActivated && !this.isCapturing) {
+      const currentTime = Date.now();
+      if (isActivated && !this.isCapturing && !this.isProcessing && 
+          (currentTime - this.lastActivationTime) > this.DEBOUNCE_TIME) {
+        this.isProcessing = true;
+        this.lastActivationTime = currentTime;
         this.takePicture();
       }
     });
@@ -209,6 +217,7 @@ export class PhotoAnalyzerComponent implements OnDestroy {
     this.error = undefined;
     this.isCapturing = true;
     this.captureTimeLeft = 35; // Cambiado de 300 a 35 segundos
+    this.isProcessing = true;
 
     try {
       const videoElement = await this.cameraService.startVideoStream();
@@ -345,7 +354,8 @@ export class PhotoAnalyzerComponent implements OnDestroy {
   }
 
   private stopCapture() {
-    this.isCapturing = false; 
+    this.isCapturing = false;
+    this.isProcessing = false; // Resetear el estado de procesamiento
     if (this.captureInterval) {
       clearInterval(this.captureInterval);
       this.captureInterval = null;
