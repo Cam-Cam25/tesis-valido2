@@ -15,6 +15,7 @@ export class FirebaseService {
   // Método para actualizar el resultado de la clasificación
   async updateClassificationResult(classification: string): Promise<void> {
     try {
+      await new Promise(resolve => setTimeout(resolve, 500));
       const resultRef = ref(this.database, 'clasificacion/resultado');
       await set(resultRef, classification);
     } catch (error) {
@@ -36,6 +37,7 @@ export class FirebaseService {
   // Método para enviar el evento de inicio del juego
   async sendGameStartEvent(): Promise<void> {
     try {
+      await new Promise(resolve => setTimeout(resolve, 500));
       const eventRef = ref(this.database, 'game_events/event/event');
       const classificationRef = ref(this.database, 'clasificacion/resultado');
       

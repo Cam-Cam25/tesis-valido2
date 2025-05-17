@@ -99,24 +99,21 @@ export class ResultComponent implements OnInit, OnDestroy {
           try {
             await this.retryOperation(async () => {
               console.log('Iniciando proceso de redirección');
+              // Limpiar el estado del juego antes de la redirección
               await this.firebaseService.sendGameStartEvent();
               console.log('Estado del juego limpiado exitosamente');
               
-              await this.router.navigate(['/'], {
-                replaceUrl: true,
-                skipLocationChange: true
-              });
-              console.log('Redirección completada exitosamente');
+              // Forzar una recarga completa de la aplicación
+              window.location.href = '/';
             });
           } catch (error) {
             console.error('Error fatal durante la redirección:', error);
-            // Último intento de redirección forzada
             window.location.href = '/';
           }
         };
 
-        // Ejecutar la redirección con un pequeño retraso inicial
-        setTimeout(redirectToHome, 1000);
+        // Ejecutar la redirección inmediatamente
+        redirectToHome();
       }
     });
   }

@@ -265,7 +265,8 @@ export class PhotoAnalyzerComponent implements OnDestroy {
 
   private async classifyWaste() {
     if (!this.imageBase64) {
-      if (!this.redirectTimer) {
+      // Solo mostramos el error si no estamos en proceso de redirección
+      if (!this.redirectTimer && !this.isCapturing) {
         this.error = 'No hay imagen para analizar';
       }
       return;
@@ -366,6 +367,12 @@ export class PhotoAnalyzerComponent implements OnDestroy {
       this.redirectTimer = null;
     }
     
+    // Limpiar el contenido del preview antes de detener la cámara
+    const previewDiv = document.querySelector('.preview');
+    if (previewDiv) {
+      previewDiv.innerHTML = '';
+    }
+
     this.cameraService.stopVideoStream();
     this.classification = undefined; 
     this.imageBase64 = undefined;
@@ -373,5 +380,6 @@ export class PhotoAnalyzerComponent implements OnDestroy {
     this.redirectCountdown = 0;
     this.analyzing = false;
     this.classificationCount = { orgánico: 0, inorgánico: 0 }; // Reiniciar contadores
+    this.lastActivationTime = 0; // Reiniciar el tiempo de la última activación
   }
 }
